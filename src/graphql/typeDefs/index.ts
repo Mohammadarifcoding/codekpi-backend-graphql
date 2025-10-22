@@ -15,11 +15,34 @@ export const typeDefs = gql`
     createdAt: String!
   }
 
+  type Workshop {
+    id: ID!
+    title: String!
+    content: String!
+    image: String!
+  }
+
   type Query {
     users: [User!]!
+    workshops: [Workshop!]!
+  }
+
+  type UserPayload {
+    message: String
+    token: String
+    user: User
   }
 
   type Mutation {
-    users(name: String!, email: String!): User!
+    createUser(name: String!, email: String!, password: String!): UserPayload!
+    createWorkshop(title: String!, content: String!, image: String!): Workshop!
+    updateWorkshop(
+      id: ID!
+      title: String
+      content: String
+      image: String
+    ): Workshop!
+    deleteWorkshop(id: ID!): Workshop!
+    signin(email: String!, password: String!): UserPayload!
   }
 `;

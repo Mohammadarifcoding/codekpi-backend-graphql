@@ -15,6 +15,10 @@ app.use(express.json());
 // REST API route
 app.use("/api/users", userRouter);
 
+app.get("/", (req, res) =>
+  res.json({ message: "Welcome to the CodeKpi Backend!" })
+);
+
 export const startServer = async () => {
   const server = new ApolloServer({ typeDefs, resolvers });
   await server.start();
