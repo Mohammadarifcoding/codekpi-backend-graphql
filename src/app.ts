@@ -5,6 +5,7 @@ import { ApolloServer } from "apollo-server-express";
 import { typeDefs } from "./graphql/typeDefs/index";
 import { resolvers } from "./graphql/resolvers/index";
 import userRouter from "./modules/user/userRoutes";
+import { jwtHelper } from "./utils/jwtHelper";
 
 dotenv.config();
 
@@ -20,7 +21,16 @@ app.get("/", (req, res) =>
 );
 
 export const startServer = async () => {
-  const server = new ApolloServer({ typeDefs, resolvers });
+  const server = new ApolloServer({
+    typeDefs,
+    resolvers,
+    context: async ({ req, res }) => {
+      const token = req.headers.authorization || "";
+      const user = await jwtHelper.getUserInfoFromToken(token);
+      console.log(user);
+      return { user };
+    },
+  });
   await server.start();
   server.applyMiddleware({ app: app as any, path: "/graphql" });
   return app;

@@ -19,6 +19,21 @@ model User {
   email     String   @unique
   createdAt DateTime @default(now())
   password  String
+  profile   Profile?
+}
+
+model Profile {
+  id          String      @id @default(uuid())
+  bio         String?
+  userId      String      @unique
+  user        User        @relation(fields: [userId], references: [id])
+  session     Session?
+  shift       Shift?
+  gender      Gender?
+  department  Department?
+  phone       String?
+  roll        String?
+  polytechnic String?
 }
 
 model Workshop {
@@ -27,4 +42,37 @@ model Workshop {
   content   String
   createdAt DateTime @default(now())
   image     String
+}
+
+enum Session {
+  SESSION_18_19 @map("18-19")
+  SESSION_19_20 @map("19-20")
+  SESSION_20_21 @map("20-21")
+  SESSION_21_22 @map("21-22")
+  SESSION_22_23 @map("22-23")
+  SESSION_23_24 @map("23-24")
+  SESSION_24_25 @map("24-25")
+}
+
+enum Department {
+  COMPUTER    @map("Computer Technology")
+  CIVIL       @map("Civil Technology")
+  ELECTRICAL  @map("Electrical Technology")
+  MECHANICAL  @map("Mechanical Technology")
+  ELECTRONICS @map("Electronics Technology")
+  POWER       @map("Power Technology")
+  AUTOMOBILE  @map("Automobile Technology")
+  RAC         @map("RAC Technology")
+  OTHER       @map("Other Technology")
+}
+
+enum Gender {
+  MALE   @map("male")
+  FEMALE @map("female")
+  OTHER  @map("other")
+}
+
+enum Shift {
+  MORNING @map("morning")
+  EVENING @map("evening")
 }
