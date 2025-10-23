@@ -6,6 +6,7 @@ export const typeDefs = gql`
     name: String!
     email: String!
     createdAt: String!
+    profile: Profile
   }
 
   enum Session {
@@ -64,7 +65,6 @@ export const typeDefs = gql`
   }
   type ProfilePayload {
     message: String
-    profile: Profile
     user: User
   }
   type Query {
@@ -75,7 +75,7 @@ export const typeDefs = gql`
   }
 
   type UserPayload {
-    message: String
+    message: String!
     token: String
     user: User
   }
@@ -101,5 +101,6 @@ export const typeDefs = gql`
       roll: String
       polytechnic: String
     ): ProfilePayload!
+    deleteUser: UserPayload!
   }
 `;

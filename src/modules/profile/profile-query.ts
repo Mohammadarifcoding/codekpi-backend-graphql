@@ -12,9 +12,9 @@ export const profileQueryResolver = {
         message: "Unauthorized",
       };
     }
-    const profile = await prisma.profile.findUnique({
-      where: { userId: user.userId },
-      include: { user: true },
+    const profile = await prisma.user.findUnique({
+      where: { id: user.userId },
+      include: { profile: true },
     });
 
     if (!profile) {
@@ -24,7 +24,7 @@ export const profileQueryResolver = {
     }
     return {
       message: "Profile fetched successfully",
-      profile,
+      user: profile,
     };
   },
 };

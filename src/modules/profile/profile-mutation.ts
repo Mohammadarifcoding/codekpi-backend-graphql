@@ -25,8 +25,7 @@ export const profileMutationResolver = {
     console.log(updateProfile, data, "updated profile");
     return {
       message: "Profile updated successfully",
-      profile: updateProfile,
-      user: updateProfile.user,
+      user: updateProfile,
     };
   },
 };

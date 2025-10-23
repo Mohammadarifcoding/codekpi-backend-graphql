@@ -60,4 +60,32 @@ export const userMutationResolver = {
       user: userWithoutPassword,
     };
   },
+  deleteUser: async (_: any, data: any, context: any) => {
+    const { user } = context;
+
+    return await prisma.$transaction(async (tx) => {
+      if (!user) throw new Error("Unauthorized");
+
+      const findUser = await tx.user.findUnique({
+        where: { id: user.userId },
+        include: { profile: true },
+      });
+
+      if (!findUser) throw new Error("User not found");
+
+      // Delete the dependent record first
+      await tx.profile.deleteMany({
+        where: { userId: user.userId },
+      });
+      // Then delete the user
+      await tx.user.delete({
+        where: { id: user.userId },
+      });
+
+      return {
+        message: "User deleted successfully",
+        user: findUser,
+      };
+    });
+  },
 };
