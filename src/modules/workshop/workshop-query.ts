@@ -2,6 +2,8 @@ import prisma from "../../services/db";
 
 export const workshopQueryResolver = {
   workshops: async () => {
-    return await prisma.workshop.findMany();
+    return await prisma.workshop.findMany({
+      include: { interestedUsers: true },
+    });
   },
 };

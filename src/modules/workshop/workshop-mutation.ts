@@ -30,4 +30,54 @@ export const workshopMutationResolver = {
       where: { id },
     });
   },
+  makeWorkshopInterested: async (_: any, { workshopId }: any, context: any) => {
+    const { user } = context;
+    if (!user) {
+      return {
+        message: "Unauthorized",
+      };
+    }
+    const updateWorkshop = await prisma.workshop.update({
+      where: { id: workshopId },
+      data: {
+        interestedUsers: {
+          connect: { id: user.userId },
+        },
+      },
+      include: {
+        interestedUsers: true,
+      },
+    });
+    return {
+      message: "Workshop marked as interested ✅",
+      workshop: updateWorkshop,
+    };
+  },
+  makeWorkshopNotInterested: async (
+    _: any,
+    { workshopId }: any,
+    context: any
+  ) => {
+    const { user } = context;
+    if (!user) {
+      return {
+        message: "Unauthorized",
+      };
+    }
+    const updateWorkshop = await prisma.workshop.update({
+      where: { id: workshopId },
+      data: {
+        interestedUsers: {
+          disconnect: { id: user.userId },
+        },
+      },
+      include: {
+        interestedUsers: true,
+      },
+    });
+    return {
+      message: "Workshop removed from interested ✅",
+      workshop: updateWorkshop,
+    };
+  },
 };

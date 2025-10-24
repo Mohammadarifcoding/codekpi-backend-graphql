@@ -7,6 +7,7 @@ export const typeDefs = gql`
     email: String!
     createdAt: String!
     profile: Profile
+    interestedWorkshops: [String!]
   }
 
   enum Session {
@@ -62,6 +63,7 @@ export const typeDefs = gql`
     title: String!
     content: String!
     image: String!
+    interestedUsers: [String]!
   }
   type ProfilePayload {
     message: String
@@ -80,6 +82,13 @@ export const typeDefs = gql`
     user: User
   }
 
+  type Message {
+    message: String!
+  }
+  type WorkshopResponse {
+    message: String!
+    workshop: Workshop
+  }
   type Mutation {
     createUser(name: String!, email: String!, password: String!): UserPayload!
     createWorkshop(title: String!, content: String!, image: String!): Workshop!
@@ -102,5 +111,8 @@ export const typeDefs = gql`
       polytechnic: String
     ): ProfilePayload!
     deleteUser: UserPayload!
+    updatePassword(oldPassword: String!, newPassword: String!): Message!
+    makeWorkshopInterested(workshopId: String!): WorkshopResponse!
+    makeWorkshopNotInterested(workshopId: String!): WorkshopResponse!
   }
 `;

@@ -88,4 +88,47 @@ export const userMutationResolver = {
       };
     });
   },
+  updatePassword: async (
+    _: any,
+    { oldPassword, newPassword }: any,
+    context: any
+  ) => {
+    return await prisma.$transaction(async (tx) => {
+      const { user } = context;
+
+      if (!user) {
+        return {
+          message: "Unauthorized",
+        };
+      }
+      const findUser = await tx.user.findUnique({
+        where: { id: user.userId },
+      });
+      if (!findUser) {
+        return {
+          message: "User not found",
+        };
+      }
+      const comparePassword = await bcrypt.compare(
+        oldPassword,
+        findUser.password
+      );
+      if (!comparePassword) {
+        return {
+          message: "Invalid password",
+        };
+      }
+      const hashPassword = await bcrypt.hash(newPassword, 10);
+      await tx.user.update({
+        where: { id: user.userId },
+        data: {
+          password: hashPassword,
+        },
+      });
+
+      return {
+        message: "Password updated successfully",
+      };
+    });
+  },
 };

@@ -2,7 +2,9 @@ import prisma from "../../services/db";
 
 export const profileQueryResolver = {
   profiles: async () => {
-    return await prisma.profile.findMany();
+    return await prisma.profile.findMany({
+      include: { user: true },
+    });
   },
   getProfile: async (_: any, {}: any, context: any) => {
     const { user } = context;
@@ -14,7 +16,7 @@ export const profileQueryResolver = {
     }
     const profile = await prisma.user.findUnique({
       where: { id: user.userId },
-      include: { profile: true },
+      include: { profile: true, interestedWorkshops: true },
     });
 
     if (!profile) {

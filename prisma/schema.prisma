@@ -14,12 +14,14 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(uuid())
-  name      String
-  email     String   @unique
-  createdAt DateTime @default(now())
-  password  String
-  profile   Profile?
+  id                  String     @id @default(uuid())
+  name                String
+  email               String     @unique
+  createdAt           DateTime   @default(now())
+  password            String
+  profile             Profile?
+  interestedWorkshops Workshop[] @relation("workshop_interested_users")
+  workshopId          String?
 }
 
 model Profile {
@@ -37,11 +39,12 @@ model Profile {
 }
 
 model Workshop {
-  id        String   @id @default(uuid())
-  title     String
-  content   String
-  createdAt DateTime @default(now())
-  image     String
+  id              String   @id @default(uuid())
+  title           String
+  content         String
+  createdAt       DateTime @default(now())
+  image           String
+  interestedUsers User[]   @relation("workshop_interested_users")
 }
 
 enum Session {
