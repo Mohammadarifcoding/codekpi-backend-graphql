@@ -1,134 +1,24 @@
-import prisma from "../../services/db";
-import bcrypt from "bcrypt";
-import { jwtHelper } from "../../utils/jwtHelper";
+import { userService } from "./user-service";
 
 export const userMutationResolver = {
   createUser: async (_: any, { name, email, password }: any) => {
-    return await prisma.$transaction(async (tx) => {
-      const findUser = await tx.user.findFirst({ where: { email } });
-      if (findUser) {
-        return {
-          message: "User already exists",
-        };
-      }
-      const hashPassword = await bcrypt.hash(password, 10);
-      const newUser = await tx.user.create({
-        data: {
-          name,
-          email,
-          password: hashPassword,
-        },
-      });
-      const token = jwtHelper.generateToken(
-        newUser.id,
-        process.env.JWT_SECRET as string
-      );
-      await tx.profile.create({
-        data: {
-          userId: newUser.id,
-        },
-      });
-      const { password: pass, ...userWithoutPassword } = newUser;
-      return {
-        message: "User created successfully",
-        token,
-        user: userWithoutPassword,
-      };
-    });
+    return await userService.createUser({ name, email, password });
   },
   signin: async (_: any, { email, password }: any) => {
-    const user = await prisma.user.findFirst({ where: { email } });
-    if (!user) {
-      return {
-        message: "User not found",
-      };
-    }
-    const comparePassword = await bcrypt.compare(password, user.password);
-    if (!comparePassword) {
-      return {
-        message: "Invalid password",
-      };
-    }
-    const token = jwtHelper.generateToken(
-      user.id,
-      process.env.JWT_SECRET as string
-    );
-    const { password: pass, ...userWithoutPassword } = user;
-    return {
-      message: "Signin successful",
-      token,
-      user: userWithoutPassword,
-    };
+    return await userService.signin({ email, password });
   },
   deleteUser: async (_: any, data: any, context: any) => {
-    const { user } = context;
-
-    return await prisma.$transaction(async (tx) => {
-      if (!user) throw new Error("Unauthorized");
-
-      const findUser = await tx.user.findUnique({
-        where: { id: user.userId },
-        include: { profile: true },
-      });
-
-      if (!findUser) throw new Error("User not found");
-
-      // Delete the dependent record first
-      await tx.profile.deleteMany({
-        where: { userId: user.userId },
-      });
-      // Then delete the user
-      await tx.user.delete({
-        where: { id: user.userId },
-      });
-
-      return {
-        message: "User deleted successfully",
-        user: findUser,
-      };
-    });
+    return await userService.deleteUser({ userId: context.user.userId });
   },
   updatePassword: async (
     _: any,
     { oldPassword, newPassword }: any,
     context: any
   ) => {
-    return await prisma.$transaction(async (tx) => {
-      const { user } = context;
-
-      if (!user) {
-        return {
-          message: "Unauthorized",
-        };
-      }
-      const findUser = await tx.user.findUnique({
-        where: { id: user.userId },
-      });
-      if (!findUser) {
-        return {
-          message: "User not found",
-        };
-      }
-      const comparePassword = await bcrypt.compare(
-        oldPassword,
-        findUser.password
-      );
-      if (!comparePassword) {
-        return {
-          message: "Invalid password",
-        };
-      }
-      const hashPassword = await bcrypt.hash(newPassword, 10);
-      await tx.user.update({
-        where: { id: user.userId },
-        data: {
-          password: hashPassword,
-        },
-      });
-
-      return {
-        message: "Password updated successfully",
-      };
+    return await userService.updatePassword({
+      userId: context.user.userId,
+      oldPassword,
+      newPassword,
     });
   },
 };

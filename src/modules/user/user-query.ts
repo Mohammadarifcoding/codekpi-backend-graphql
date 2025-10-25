@@ -1,9 +1,8 @@
 import prisma from "../../services/db";
+import { userService } from "./user-service";
 
 export const userQueryResolver = {
   users: async () => {
-    return await prisma.user.findMany({
-      include: { profile: true, interestedWorkshops: true },
-    });
+    return await userService.getUsers();
   },
 };
