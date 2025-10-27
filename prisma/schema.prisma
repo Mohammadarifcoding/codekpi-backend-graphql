@@ -26,6 +26,8 @@ model User {
 
 model Profile {
   id          String      @id @default(uuid())
+  avatarId    String?     @unique
+  avatar      Picture?    @relation("ProfileAvatar", fields: [avatarId], references: [id])
   bio         String?
   userId      String      @unique
   user        User        @relation(fields: [userId], references: [id])
@@ -36,15 +38,39 @@ model Profile {
   phone       String?
   roll        String?
   polytechnic String?
+  pictureId   String?
 }
 
 model Workshop {
   id              String   @id @default(uuid())
   title           String
+  bannerId        String?  @unique
+  banner          Picture? @relation("WorkshopBanner", fields: [bannerId], references: [id])
   content         String
   createdAt       DateTime @default(now())
-  image           String
   interestedUsers User[]   @relation("workshop_interested_users")
+}
+
+model Review {
+  id          String     @id @default(ulid())
+  userImageId String?    @unique
+  userImage   Picture?   @relation("UserImage", fields: [userImageId], references: [id])
+  name        String
+  text        String
+  rating      Int
+  status      Status     @default(PENDING)
+  department  Department
+  session     Session
+  shift       Shift
+  createdAt   DateTime   @default(now())
+}
+
+model Picture {
+  id       String    @id @default(ulid())
+  image    String
+  review   Review?   @relation("UserImage")
+  Profile  Profile?  @relation("ProfileAvatar")
+  Workshop Workshop? @relation("WorkshopBanner")
 }
 
 enum Session {
@@ -78,4 +104,9 @@ enum Gender {
 enum Shift {
   MORNING @map("morning")
   EVENING @map("evening")
+}
+
+enum Status {
+  PENDING  @map("pending")
+  APPROVED @map("approved")
 }

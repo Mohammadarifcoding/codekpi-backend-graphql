@@ -2,21 +2,26 @@ import { GraphQLError } from "graphql";
 import prisma from "../../services/db";
 import { userService } from "../user/user-service";
 import type { Prisma } from "@prisma/client";
+import { pictureService } from "../picture/picture-service";
 
 const createWorkshop = async ({
   title,
   content,
-  image,
+  banner,
 }: {
   title: string;
   content: string;
-  image: string;
+  banner: string;
 }) => {
   return await prisma.$transaction(async (tx) => {
+    const picture = await pictureService.createPicture(banner, tx);
     const newWorkshop = await tx.workshop.create({
-      data: { title, content, image },
+      data: {
+        title,
+        content,
+        banner: { connect: { id: picture.id } },
+      },
     });
-
     return {
       message: "Workshop created successfully ✅",
       workshop: newWorkshop,
@@ -24,24 +29,29 @@ const createWorkshop = async ({
   });
 };
 
-const updateWorkshop = async ({
-  id,
-  title,
-  content,
-  image,
-}: {
+type UpdateWorkshopInput = {
   id: string;
   title?: string;
   content?: string;
-  image?: string;
-}) => {
+  banner?: string;
+};
+
+export const updateWorkshop = async ({
+  id,
+  title,
+  content,
+  banner,
+}: UpdateWorkshopInput) => {
   return await prisma.$transaction(async (tx) => {
     await findWorkshopOrThrow({ workshopId: id });
-
     const data: Prisma.WorkshopUpdateInput = {};
     if (title) data.title = title;
     if (content) data.content = content;
-    if (image) data.image = image;
+
+    if (banner) {
+      const picture = await pictureService.createPicture(banner, tx);
+      data.banner = { connect: { id: picture.id } };
+    }
 
     const updatedWorkshop = await tx.workshop.update({
       where: { id },
@@ -107,7 +117,7 @@ const makeWorkshopNotInterested = async ({
 }) => {
   return await prisma.$transaction(async (tx) => {
     const user = await userService.findUserOrThrow({ userId });
-    const workshop = await findWorkshopOrThrow({ workshopId });
+    await findWorkshopOrThrow({ workshopId });
 
     const updatedWorkshop = await tx.workshop.update({
       where: { id: workshopId },

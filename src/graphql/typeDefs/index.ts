@@ -1,20 +1,15 @@
-import { gql } from "apollo-server-express"; // Or "@apollo/server"
+import { gql } from "apollo-server-express";
 
 export const typeDefs = gql`
   scalar DateTime
+
   interface BaseResponse {
     message: String!
   }
 
-  type User {
-    id: ID!
-    name: String!
-    email: String!
-    createdAt: DateTime!
-    profile: Profile
-    interestedWorkshops: [Workshop!]!
-  }
-
+  # =====================
+  # ENUMS
+  # =====================
   enum Session {
     SESSION_18_19
     SESSION_19_20
@@ -48,8 +43,32 @@ export const typeDefs = gql`
     EVENING
   }
 
+  enum Status {
+    PENDING
+    APPROVED
+  }
+
+  # =====================
+  # CORE MODELS
+  # =====================
+
+  type Picture {
+    id: ID!
+    image: String!
+  }
+
+  type User {
+    id: ID!
+    name: String!
+    email: String!
+    createdAt: DateTime!
+    profile: Profile
+    interestedWorkshops: [Workshop!]!
+  }
+
   type Profile {
     id: ID!
+    avatar: Picture
     bio: String
     userId: String!
     user: User!
@@ -60,29 +79,33 @@ export const typeDefs = gql`
     phone: String
     roll: String
     polytechnic: String
-    createdAt: DateTime!
   }
 
   type Workshop {
     id: ID!
     title: String!
     content: String!
-    image: String!
+    banner: Picture
+    createdAt: DateTime!
     interestedUsers: [User!]!
+  }
+
+  type Review {
+    id: ID!
+    userImage: Picture
+    name: String!
+    text: String!
+    rating: Int!
+    status: Status
+    department: Department
+    session: Session
+    shift: Shift
     createdAt: DateTime!
   }
 
-  type ProfilePayload implements BaseResponse {
-    message: String!
-    user: User
-  }
-
-  type Query {
-    users: [User!]!
-    workshops: [Workshop!]!
-    getProfile: ProfilePayload!
-    profiles: [Profile!]!
-  }
+  # =====================
+  # PAYLOAD TYPES
+  # =====================
 
   type UserPayload implements BaseResponse {
     message: String!
@@ -90,8 +113,9 @@ export const typeDefs = gql`
     user: User
   }
 
-  type Message implements BaseResponse {
+  type ProfilePayload implements BaseResponse {
     message: String!
+    user: User
   }
 
   type WorkshopResponse implements BaseResponse {
@@ -99,16 +123,24 @@ export const typeDefs = gql`
     workshop: Workshop
   }
 
+  type Message implements BaseResponse {
+    message: String!
+  }
+
+  # =====================
+  # INPUT TYPES
+  # =====================
+
   input CreateWorkshopInput {
     title: String!
     content: String!
-    image: String!
+    banner: String!
   }
 
   input UpdateWorkshopInput {
     title: String
     content: String
-    image: String
+    banner: String
   }
 
   input UpdateProfileInput {
@@ -120,18 +152,51 @@ export const typeDefs = gql`
     phone: String
     roll: String
     polytechnic: String
+    avatar: String # user uploads image string
   }
+
+  input CreateReviewInput {
+    name: String!
+    text: String!
+    rating: Int!
+    department: Department!
+    session: Session!
+    shift: Shift!
+    userImage: String! # user uploads image string
+  }
+
+  # =====================
+  # QUERIES
+  # =====================
+
+  type Query {
+    users(page: Int!, limit: Int!): [User!]!
+    profiles: [Profile!]!
+    workshops: [Workshop!]!
+    reviews(page: Int!, limit: Int!): [Review!]!
+    getProfile: Profile!
+  }
+
+  # =====================
+  # MUTATIONS
+  # =====================
 
   type Mutation {
     createUser(name: String!, email: String!, password: String!): UserPayload!
+    signin(email: String!, password: String!): UserPayload!
+    deleteUser: UserPayload!
+    updatePassword(oldPassword: String!, newPassword: String!): Message!
+
+    updateProfile(input: UpdateProfileInput!): ProfilePayload!
+
     createWorkshop(input: CreateWorkshopInput!): Workshop!
     updateWorkshop(id: ID!, input: UpdateWorkshopInput): Workshop!
     deleteWorkshop(id: ID!): Workshop!
-    signin(email: String!, password: String!): UserPayload!
-    updateProfile(input: UpdateProfileInput!): ProfilePayload!
-    deleteUser: UserPayload!
-    updatePassword(oldPassword: String!, newPassword: String!): Message!
     makeWorkshopInterested(workshopId: String!): WorkshopResponse!
     makeWorkshopNotInterested(workshopId: String!): WorkshopResponse!
+
+    createReview(input: CreateReviewInput!): Review!
+    updateStatus(id: ID!, status: Status!): Review!
+    deleteReview(id: ID!): Review!
   }
 `;

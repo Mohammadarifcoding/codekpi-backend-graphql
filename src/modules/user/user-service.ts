@@ -81,10 +81,22 @@ const updatePassword = async ({ userId, oldPassword, newPassword }: any) => {
   });
 };
 
-const getUsers = async () => {
-  return await prisma.user.findMany({
+const getUsers = async (page: number, limit: number) => {
+  const skip = (page - 1) * limit;
+  const data = await prisma.user.findMany({
     include: { profile: true },
+    skip,
+    take: limit,
+    orderBy: { createdAt: "desc" },
   });
+
+  return {
+    message: "Users fetched successfully ✅",
+    data: data,
+    page: page,
+    limit: limit,
+    total: await prisma.user.count(),
+  };
 };
 
 const findUserOrThrow = async ({
