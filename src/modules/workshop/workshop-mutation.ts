@@ -1,4 +1,5 @@
 import prisma from "../../services/db";
+import { workshopService } from "./workshop-service";
 
 export const workshopMutationResolver = {
   createWorkshop: async (
@@ -6,78 +7,29 @@ export const workshopMutationResolver = {
     { title, content, image }: any,
     context: any
   ) => {
-    console.log("Creating workshop with:", { title, content, image });
-    const workshop = await prisma.workshop.create({
-      data: { title, content, image },
-    });
-    return workshop;
+    return await workshopService.createWorkshop({ title, content, image });
   },
-  updateWorkshop: async (
-    _: any,
-    { id, title, content, image }: any,
-    context: any
-  ) => {
-    const workshop = await prisma.workshop.update({
-      where: { id },
-      data: { title, content, image },
-    });
-
-    return workshop;
+  updateWorkshop: async (_: any, data: any, context: any) => {
+    return await workshopService.updateWorkshop(data);
   },
 
   deleteWorkshop: async (_: any, { id }: any, context: any) => {
-    const workshop = await prisma.workshop.delete({
-      where: { id },
-    });
+    return await workshopService.deleteWorkshop({ id });
   },
   makeWorkshopInterested: async (_: any, { workshopId }: any, context: any) => {
-    const { user } = context;
-    if (!user) {
-      return {
-        message: "Unauthorized",
-      };
-    }
-    const updateWorkshop = await prisma.workshop.update({
-      where: { id: workshopId },
-      data: {
-        interestedUsers: {
-          connect: { id: user.userId },
-        },
-      },
-      include: {
-        interestedUsers: true,
-      },
+    return await workshopService.makeWorkshopInterested({
+      workshopId,
+      userId: context.user.userId,
     });
-    return {
-      message: "Workshop marked as interested ✅",
-      workshop: updateWorkshop,
-    };
   },
   makeWorkshopNotInterested: async (
     _: any,
     { workshopId }: any,
     context: any
   ) => {
-    const { user } = context;
-    if (!user) {
-      return {
-        message: "Unauthorized",
-      };
-    }
-    const updateWorkshop = await prisma.workshop.update({
-      where: { id: workshopId },
-      data: {
-        interestedUsers: {
-          disconnect: { id: user.userId },
-        },
-      },
-      include: {
-        interestedUsers: true,
-      },
+    return await workshopService.makeWorkshopNotInterested({
+      workshopId,
+      userId: context.user.userId,
     });
-    return {
-      message: "Workshop removed from interested ✅",
-      workshop: updateWorkshop,
-    };
   },
 };

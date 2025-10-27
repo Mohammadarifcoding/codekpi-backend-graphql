@@ -1,5 +1,6 @@
 import { GraphQLError } from "graphql";
 import prisma from "../../services/db";
+import { userService } from "../user/user-service";
 
 const getProfiles = async () => {
   return await prisma.profile.findMany({
@@ -25,14 +26,7 @@ const getMyProfile = async (userId: string) => {
 };
 
 const updateProfile = async (userId: string, data: any) => {
-  const find = await prisma.profile.findUnique({
-    where: { userId: userId },
-  });
-  if (!find) {
-    throw new GraphQLError("Profile Not found", {
-      extensions: { code: "BAD_REQUEST" },
-    });
-  }
+  const user = await userService.findUserOrThrow;
   const updateProfile = await prisma.profile.update({
     where: { userId: userId },
     data: { ...data },

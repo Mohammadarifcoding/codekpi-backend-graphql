@@ -1,13 +1,18 @@
-import { gql } from "apollo-server-express";
+import { gql } from "apollo-server-express"; // Or "@apollo/server"
 
 export const typeDefs = gql`
+  scalar DateTime
+  interface BaseResponse {
+    message: String!
+  }
+
   type User {
     id: ID!
     name: String!
     email: String!
-    createdAt: String!
+    createdAt: DateTime!
     profile: Profile
-    interestedWorkshops: [String!]
+    interestedWorkshops: [Workshop!]!
   }
 
   enum Session {
@@ -55,7 +60,7 @@ export const typeDefs = gql`
     phone: String
     roll: String
     polytechnic: String
-    createdAt: String!
+    createdAt: DateTime!
   }
 
   type Workshop {
@@ -63,12 +68,15 @@ export const typeDefs = gql`
     title: String!
     content: String!
     image: String!
-    interestedUsers: [String]!
+    interestedUsers: [User!]!
+    createdAt: DateTime!
   }
-  type ProfilePayload {
-    message: String
+
+  type ProfilePayload implements BaseResponse {
+    message: String!
     user: User
   }
+
   type Query {
     users: [User!]!
     workshops: [Workshop!]!
@@ -76,40 +84,51 @@ export const typeDefs = gql`
     profiles: [Profile!]!
   }
 
-  type UserPayload {
+  type UserPayload implements BaseResponse {
     message: String!
     token: String
     user: User
   }
 
-  type Message {
+  type Message implements BaseResponse {
     message: String!
   }
-  type WorkshopResponse {
+
+  type WorkshopResponse implements BaseResponse {
     message: String!
     workshop: Workshop
   }
+
+  input CreateWorkshopInput {
+    title: String!
+    content: String!
+    image: String!
+  }
+
+  input UpdateWorkshopInput {
+    title: String
+    content: String
+    image: String
+  }
+
+  input UpdateProfileInput {
+    bio: String
+    session: Session
+    shift: Shift
+    gender: Gender
+    department: Department
+    phone: String
+    roll: String
+    polytechnic: String
+  }
+
   type Mutation {
     createUser(name: String!, email: String!, password: String!): UserPayload!
-    createWorkshop(title: String!, content: String!, image: String!): Workshop!
-    updateWorkshop(
-      id: ID!
-      title: String
-      content: String
-      image: String
-    ): Workshop!
+    createWorkshop(input: CreateWorkshopInput!): Workshop!
+    updateWorkshop(id: ID!, input: UpdateWorkshopInput): Workshop!
     deleteWorkshop(id: ID!): Workshop!
     signin(email: String!, password: String!): UserPayload!
-    updateProfile(
-      bio: String
-      session: Session
-      shift: Shift
-      gender: Gender
-      department: Department
-      phone: String
-      roll: String
-      polytechnic: String
-    ): ProfilePayload!
+    updateProfile(input: UpdateProfileInput!): ProfilePayload!
     deleteUser: UserPayload!
     updatePassword(oldPassword: String!, newPassword: String!): Message!
     makeWorkshopInterested(workshopId: String!): WorkshopResponse!
