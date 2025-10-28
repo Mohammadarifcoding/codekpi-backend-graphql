@@ -3,9 +3,13 @@ import prisma from "../../services/db";
 import { pictureService } from "../picture/picture-service";
 
 const createReview = async (data: Review) => {
-  const picture = await pictureService.createPicture(data., tx);
+  if (!data.userImageId) {
+    throw new Error("User image ID is required");
+  }
+  const picture = await pictureService.createPicture(data.userImageId, prisma);
+  const { userImageId, ...reviewData } = data;
   const newReview = await prisma.review.create({
-    data: {...data},
+    data: { ...reviewData, userImage: { connect: { id: picture.id } } },
   });
 
   return {

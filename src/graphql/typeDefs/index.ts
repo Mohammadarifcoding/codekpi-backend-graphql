@@ -115,14 +115,17 @@ export const typeDefs = gql`
 
   type ProfilePayload implements BaseResponse {
     message: String!
-    user: User
+    profile: Profile
   }
 
   type WorkshopResponse implements BaseResponse {
     message: String!
     workshop: Workshop
   }
-
+  type AllWorkshopResponse implements BaseResponse {
+    message: String!
+    workshops: [Workshop!]!
+  }
   type Message implements BaseResponse {
     message: String!
   }
@@ -172,7 +175,7 @@ export const typeDefs = gql`
   type Query {
     users(page: Int!, limit: Int!): [User!]!
     profiles: [Profile!]!
-    workshops: [Workshop!]!
+    workshops: AllWorkshopResponse!
     reviews(page: Int!, limit: Int!): [Review!]!
     getProfile: Profile!
   }
@@ -189,9 +192,9 @@ export const typeDefs = gql`
 
     updateProfile(input: UpdateProfileInput!): ProfilePayload!
 
-    createWorkshop(input: CreateWorkshopInput!): Workshop!
-    updateWorkshop(id: ID!, input: UpdateWorkshopInput): Workshop!
-    deleteWorkshop(id: ID!): Workshop!
+    createWorkshop(input: CreateWorkshopInput!): WorkshopResponse!
+    updateWorkshop(id: ID!, input: UpdateWorkshopInput!): WorkshopResponse!
+    deleteWorkshop(id: ID!): WorkshopResponse!
     makeWorkshopInterested(workshopId: String!): WorkshopResponse!
     makeWorkshopNotInterested(workshopId: String!): WorkshopResponse!
 

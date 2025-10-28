@@ -26,7 +26,8 @@ const getMyProfile = async (userId: string) => {
 };
 
 const updateProfile = async (userId: string, data: any) => {
-  const user = await userService.findUserOrThrow;
+  console.log(data, userId);
+  await userService.findUserOrThrow({ userId });
   const updateProfile = await prisma.profile.update({
     where: { userId: userId },
     data: { ...data },
@@ -34,7 +35,7 @@ const updateProfile = async (userId: string, data: any) => {
   });
   return {
     message: "Profile updated successfully",
-    user: updateProfile,
+    profile: updateProfile,
   };
 };
 

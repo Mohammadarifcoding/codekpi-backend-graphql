@@ -21,6 +21,9 @@ const createWorkshop = async ({
         content,
         banner: { connect: { id: picture.id } },
       },
+      include: {
+        banner: true,
+      },
     });
     return {
       message: "Workshop created successfully ✅",
@@ -31,20 +34,20 @@ const createWorkshop = async ({
 
 type UpdateWorkshopInput = {
   id: string;
-  title?: string;
-  content?: string;
-  banner?: string;
+  input: {
+    title?: string;
+    content?: string;
+    banner?: string;
+  };
 };
 
-export const updateWorkshop = async ({
-  id,
-  title,
-  content,
-  banner,
-}: UpdateWorkshopInput) => {
+export const updateWorkshop = async ({ id, input }: UpdateWorkshopInput) => {
   return await prisma.$transaction(async (tx) => {
-    await findWorkshopOrThrow({ workshopId: id });
+    const { title, content, banner } = input;
+    await findWorkshopOrThrow({ workshopId: id }); // ensure it's using same tx
+
     const data: Prisma.WorkshopUpdateInput = {};
+
     if (title) data.title = title;
     if (content) data.content = content;
 
@@ -56,6 +59,7 @@ export const updateWorkshop = async ({
     const updatedWorkshop = await tx.workshop.update({
       where: { id },
       data,
+      include: { banner: true },
     });
 
     return {
@@ -68,7 +72,14 @@ export const updateWorkshop = async ({
 const deleteWorkshop = async ({ id }: { id: string }) => {
   return await prisma.$transaction(async (tx) => {
     await findWorkshopOrThrow({ workshopId: id });
-
+    await tx.workshop.update({
+      where: { id },
+      data: {
+        interestedUsers: {
+          set: [],
+        },
+      },
+    });
     const deletedWorkshop = await tx.workshop.delete({
       where: { id },
     });
@@ -158,11 +169,11 @@ const findWorkshopOrThrow = async ({ workshopId }: { workshopId?: string }) => {
 
 const getAllWorkshop = async () => {
   const workshops = await prisma.workshop.findMany({
-    include: { interestedUsers: true },
+    include: { interestedUsers: true, banner: true },
   });
   return {
     message: "Workshop fetched successfully ✅",
-    workshop: workshops,
+    workshops: workshops,
   };
 };
 

@@ -1,18 +1,25 @@
-import type { Workshop } from "@prisma/client";
-import prisma from "../../services/db";
 import { workshopService } from "./workshop-service";
+
+export const workshopQueryResolver = {
+  workshops: async () => {
+    return await workshopService.getAllWorkshop();
+  },
+};
 
 export const workshopMutationResolver = {
   createWorkshop: async (
     _: any,
-    { title, content, banner }: any,
+    { input: { title, content, banner } }: any,
     context: any
   ) => {
-    return await workshopService.createWorkshop({
+    console.log(title, content, banner);
+    const data = await workshopService.createWorkshop({
       title,
       content,
       banner,
     });
+    console.log(data);
+    return data;
   },
   updateWorkshop: async (_: any, data: any, context: any) => {
     return await workshopService.updateWorkshop(data);

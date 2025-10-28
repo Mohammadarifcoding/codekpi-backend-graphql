@@ -1,5 +1,4 @@
 import type { PrismaClient } from "@prisma/client";
-import prisma from "../../services/db";
 
 const createPicture = async (
   image: string,
@@ -10,7 +9,7 @@ const createPicture = async (
 ) => {
   const picture = await tx.picture.create({
     data: {
-      image: image,
+      image,
     },
   });
   return picture;
