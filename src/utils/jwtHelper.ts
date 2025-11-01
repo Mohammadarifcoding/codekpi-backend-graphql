@@ -17,7 +17,7 @@ const verifyToken = async (token: string, secret: string) => {
 const getUserInfoFromToken = async (token: string) => {
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET as string);
-    return decoded as { userId: number };
+    return decoded as { userId: string };
   } catch (error) {
     return null;
   }

@@ -4,7 +4,7 @@ import dotenv from "dotenv";
 import { ApolloServer } from "apollo-server-express";
 import { typeDefs } from "./graphql/typeDefs/index";
 import { resolvers } from "./graphql/resolvers/index";
-import userRouter from "./modules/user/userRoutes";
+// import userRouter from "./modules/user/userRoutes";
 import { jwtHelper } from "./utils/jwtHelper";
 
 dotenv.config();
@@ -14,7 +14,7 @@ app.use(cors());
 app.use(express.json());
 
 // REST API route
-app.use("/api/users", userRouter);
+// app.use("/api/users", userRouter);
 
 app.get("/", (req, res) =>
   res.json({ message: "Welcome to the CodeKpi Backend!" })

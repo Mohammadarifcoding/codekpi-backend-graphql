@@ -3,6 +3,7 @@ import prisma from "../../services/db";
 import bcrypt from "bcrypt";
 import { jwtHelper } from "../../utils/jwtHelper";
 import type { Prisma } from "@prisma/client";
+import { authorization } from "../../utils/authorization";
 
 const createUser = async ({ name, email, password }: any) => {
   return await prisma.$transaction(async (tx) => {
@@ -48,8 +49,8 @@ const signin = async ({ email, password }: any) => {
 
 const deleteUser = async ({ userId }: { userId: string }) => {
   return await prisma.$transaction(async (tx) => {
-    await findUserOrThrow({ userId });
-
+    const user = await findUserOrThrow({ userId });
+    authorization.requireAdmin(user);
     await tx.profile.deleteMany({
       where: { userId: userId },
     });
@@ -81,7 +82,14 @@ const updatePassword = async ({ userId, oldPassword, newPassword }: any) => {
   });
 };
 
-const getUsers = async (page: number, limit: number) => {
+const getUsers = async (
+  page: number = 1,
+  limit: number = 10,
+  userId: string
+) => {
+  const user = await findUserOrThrow({ userId: userId });
+  console.log(user);
+  authorization.requireAdmin(user);
   const skip = (page - 1) * limit;
   const data = await prisma.user.findMany({
     include: { profile: true },
@@ -107,8 +115,8 @@ const findUserOrThrow = async ({
   email?: string;
 }) => {
   if (!userId && !email) {
-    throw new GraphQLError("Internal server error", {
-      extensions: { code: "INTERNAL_SERVER_ERROR" },
+    throw new GraphQLError("Authentication failed: user not found in context", {
+      extensions: { code: "UNAUTHENTICATED" },
     });
   }
 

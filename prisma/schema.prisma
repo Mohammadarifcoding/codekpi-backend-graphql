@@ -19,9 +19,9 @@ model User {
   email               String     @unique
   createdAt           DateTime   @default(now())
   password            String
+  role                Role       @default(USER)
   profile             Profile?
   interestedWorkshops Workshop[] @relation("workshop_interested_users")
-  workshopId          String?
 }
 
 model Profile {
@@ -38,7 +38,6 @@ model Profile {
   phone       String?
   roll        String?
   polytechnic String?
-  pictureId   String?
 }
 
 model Workshop {
@@ -109,4 +108,10 @@ enum Shift {
 enum Status {
   PENDING  @map("pending")
   APPROVED @map("approved")
+}
+
+enum Role {
+  USER      @map("user")
+  ADMIN     @map("admin")
+  MODERATOR @map("moderator")
 }

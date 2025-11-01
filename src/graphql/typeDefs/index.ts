@@ -130,6 +130,14 @@ export const typeDefs = gql`
     message: String!
   }
 
+  type UsersResponse {
+    message: String!
+    data: [User!]!
+    page: Int!
+    limit: Int!
+    total: Int!
+  }
+
   # =====================
   # INPUT TYPES
   # =====================
@@ -173,7 +181,7 @@ export const typeDefs = gql`
   # =====================
 
   type Query {
-    users(page: Int!, limit: Int!): [User!]!
+    users(page: Int, limit: Int): UsersResponse!
     profiles: [Profile!]!
     workshops: AllWorkshopResponse!
     reviews(page: Int!, limit: Int!): [Review!]!
