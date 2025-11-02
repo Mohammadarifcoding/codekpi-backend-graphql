@@ -4,6 +4,8 @@ import bcrypt from "bcrypt";
 import { jwtHelper } from "../../utils/jwtHelper";
 import type { Prisma } from "@prisma/client";
 import { authorization } from "../../utils/authorization";
+import { generateOTP, sendVerificationEmail } from "../../utils/otp";
+import jwt from "jsonwebtoken";
 
 const createUser = async ({ name, email, password }: any) => {
   return await prisma.$transaction(async (tx) => {
@@ -47,17 +49,24 @@ const signin = async ({ email, password }: any) => {
   };
 };
 
-const deleteUser = async ({ userId }: { userId: string }) => {
+const deleteUser = async ({
+  userId,
+  deleteId,
+}: {
+  userId: string;
+  deleteId: string;
+}) => {
   return await prisma.$transaction(async (tx) => {
     const user = await findUserOrThrow({ userId });
-    authorization.requireAdmin(user);
+    if (user.id !== deleteId) authorization.requireAdmin(user);
+
+    await findUserOrThrow({ userId: deleteId, message: "User not found" });
     await tx.profile.deleteMany({
-      where: { userId: userId },
+      where: { userId: deleteId },
     });
     const deleteUser = await tx.user.delete({
-      where: { id: userId },
+      where: { id: deleteId },
     });
-
     return {
       message: "User deleted successfully",
       user: deleteUser,
@@ -107,17 +116,87 @@ const getUsers = async (
   };
 };
 
+const createOTP = async ({ email }: any) => {
+  await findUserOrThrow({ email });
+  const otp = generateOTP();
+  const otpHash = await bcrypt.hash(otp, 10);
+  const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
+  await prisma.otp.create({
+    data: { email, otp_hash: otpHash, expires_at: expiresAt },
+  });
+  await sendVerificationEmail(email, otp);
+  return {
+    message: "OTP sent successfully",
+    success: true,
+  };
+};
+
+const verifyOTP = async ({ email, code }: { email: string; code: string }) => {
+  const otpData = await prisma.otp.findFirst({
+    where: { email: email, used: false },
+    orderBy: { createdAt: "desc" },
+  });
+  if (!otpData) {
+    throw new GraphQLError("OTP not found", {
+      extensions: { code: "NOT_FOUND" },
+    });
+  }
+  if (otpData.expires_at < new Date()) {
+    throw new GraphQLError("OTP expired", {
+      extensions: { code: "UNAUTHENTICATED" },
+    });
+  }
+  const compareOTP = await bcrypt.compare(code, otpData?.otp_hash);
+  if (!compareOTP) {
+    throw new GraphQLError("Invalid OTP", {
+      extensions: { code: "UNAUTHENTICATED" },
+    });
+  }
+  await prisma.otp.update({ where: { id: otpData.id }, data: { used: true } });
+  const resetToken = jwt.sign({ email }, process.env.JWT_SECRET!, {
+    expiresIn: "10m",
+  });
+  return {
+    message: "OTP verified successfully",
+    success: true,
+    verified: true,
+    resetToken,
+  };
+};
+const changePassword = async ({ token, newPassword }: any) => {
+  try {
+    const { email } = jwt.verify(token, process.env.JWT_SECRET!) as {
+      email: string;
+    };
+    const hashed = await bcrypt.hash(newPassword, 10);
+    await prisma.user.update({
+      where: { email },
+      data: { password: hashed },
+    });
+
+    return { message: "Password changed successfully", success: true };
+  } catch (err) {
+    throw new GraphQLError("Invalid or expired token", {
+      extensions: { code: "UNAUTHENTICATED" },
+    });
+  }
+};
 const findUserOrThrow = async ({
   userId,
   email,
+  message,
 }: {
   userId?: string;
   email?: string;
+  message?: string;
 }) => {
   if (!userId && !email) {
-    throw new GraphQLError("Authentication failed: user not found in context", {
-      extensions: { code: "UNAUTHENTICATED" },
-    });
+    throw new GraphQLError(
+      message || "Authentication failed: user not found in context",
+      {
+        extensions: { code: "UNAUTHENTICATED" },
+      }
+    );
   }
 
   const where: Prisma.UserWhereUniqueInput = userId
@@ -163,4 +242,7 @@ export const userService = {
   findUserOrThrow,
   checkPassword,
   validateEmailAvailable,
+  createOTP,
+  verifyOTP,
+  changePassword,
 };

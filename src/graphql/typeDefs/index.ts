@@ -102,6 +102,13 @@ export const typeDefs = gql`
     shift: Shift
     createdAt: DateTime!
   }
+  type OTP {
+    id: ID!
+    email: String!
+    used: Boolean!
+    expires_at: String!
+    createdAt: String!
+  }
 
   # =====================
   # PAYLOAD TYPES
@@ -130,6 +137,11 @@ export const typeDefs = gql`
     message: String!
   }
 
+  type SuccessMessage implements BaseResponse {
+    message: String!
+    success: Boolean
+  }
+
   type UsersResponse {
     message: String!
     data: [User!]!
@@ -137,7 +149,17 @@ export const typeDefs = gql`
     limit: Int!
     total: Int!
   }
+  type CreateOTPResponse {
+    success: Boolean!
+    message: String!
+  }
 
+  type VerifyOTPResponse {
+    success: Boolean!
+    message: String!
+    verified: Boolean
+    resetToken: String
+  }
   # =====================
   # INPUT TYPES
   # =====================
@@ -195,8 +217,11 @@ export const typeDefs = gql`
   type Mutation {
     createUser(name: String!, email: String!, password: String!): UserPayload!
     signin(email: String!, password: String!): UserPayload!
-    deleteUser: UserPayload!
+    deleteUser(userId: String!): UserPayload!
     updatePassword(oldPassword: String!, newPassword: String!): Message!
+    createOTP(email: String!): CreateOTPResponse!
+    verifyOTP(email: String!, code: String!): VerifyOTPResponse!
+    changePassword(token: String!, newPassword: String!): SuccessMessage!
 
     updateProfile(input: UpdateProfileInput!): ProfilePayload!
 

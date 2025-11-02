@@ -72,6 +72,15 @@ model Picture {
   Workshop Workshop? @relation("WorkshopBanner")
 }
 
+model Otp {
+  id         String   @id @default(ulid())
+  email      String
+  otp_hash   String
+  expires_at DateTime
+  used       Boolean  @default(false)
+  createdAt  DateTime @default(now())
+}
+
 enum Session {
   SESSION_18_19 @map("18-19")
   SESSION_19_20 @map("19-20")

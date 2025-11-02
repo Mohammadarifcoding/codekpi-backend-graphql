@@ -19,7 +19,10 @@ export const userMutationResolver = {
     return await userService.signin({ email, password });
   },
   deleteUser: async (_: any, data: any, context: any) => {
-    return await userService.deleteUser({ userId: context.user.userId });
+    return await userService.deleteUser({
+      userId: context?.user?.userId,
+      deleteId: data?.userId,
+    });
   },
   updatePassword: async (
     _: any,
@@ -31,5 +34,14 @@ export const userMutationResolver = {
       oldPassword,
       newPassword,
     });
+  },
+  createOTP: async (_: any, { email }: any) => {
+    return await userService.createOTP({ email });
+  },
+  verifyOTP: async (_: any, { email, code }: any) => {
+    return await userService.verifyOTP({ email, code });
+  },
+  changePassword: async (_: any, { token, newPassword }: any) => {
+    return await userService.changePassword({ token, newPassword });
   },
 };
