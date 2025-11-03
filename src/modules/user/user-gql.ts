@@ -12,17 +12,20 @@ export const userQueryResolver = {
 };
 
 export const userMutationResolver = {
-  createUser: async (_: any, { name, email, password }: any) => {
-    return await userService.createUser({ name, email, password });
+  createUser: async (_: any, { name, email, password }: any, context: any) => {
+    return await userService.createUser({ name, email, password }, context);
   },
-  signin: async (_: any, { email, password }: any) => {
-    return await userService.signin({ email, password });
+  signin: async (_: any, { email, password }: any, context: any) => {
+    return await userService.signin({ email, password }, context);
   },
   deleteUser: async (_: any, data: any, context: any) => {
-    return await userService.deleteUser({
-      userId: context?.user?.userId,
-      deleteId: data?.userId,
-    });
+    return await userService.deleteUser(
+      {
+        userId: context?.user?.userId,
+        deleteId: data?.userId,
+      },
+      context
+    );
   },
   updatePassword: async (
     _: any,
@@ -35,13 +38,13 @@ export const userMutationResolver = {
       newPassword,
     });
   },
-  createOTP: async (_: any, { email }: any) => {
+  createOTP: async (_: any, { email }: any, context: any) => {
     return await userService.createOTP({ email });
   },
-  verifyOTP: async (_: any, { email, code }: any) => {
+  verifyOTP: async (_: any, { email, code }: any, context: any) => {
     return await userService.verifyOTP({ email, code });
   },
-  changePassword: async (_: any, { token, newPassword }: any) => {
+  changePassword: async (_: any, { token, newPassword }: any, context: any) => {
     return await userService.changePassword({ token, newPassword });
   },
 };

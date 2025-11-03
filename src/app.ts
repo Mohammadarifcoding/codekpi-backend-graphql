@@ -1,6 +1,7 @@
 import express, { type Application } from "express";
 import cors from "cors";
 import dotenv from "dotenv";
+import cookieParser from "cookie-parser";
 import { ApolloServer } from "apollo-server-express";
 import { typeDefs } from "./graphql/typeDefs/index";
 import { resolvers } from "./graphql/resolvers/index";
@@ -10,7 +11,12 @@ import { jwtHelper } from "./utils/jwtHelper";
 dotenv.config();
 
 const app = express();
-app.use(cors());
+app.use(cookieParser());
+app.use(
+  cors({
+    credentials: true,
+  })
+);
 app.use(express.json());
 
 // REST API route
@@ -28,7 +34,7 @@ export const startServer = async () => {
       const token = req.headers.authorization || "";
       const user = await jwtHelper.getUserInfoFromToken(token);
       console.log(user);
-      return { user };
+      return { user, res, req };
     },
   });
   await server.start();

@@ -7,7 +7,7 @@ import { authorization } from "../../utils/authorization";
 import { generateOTP, sendVerificationEmail } from "../../utils/otp";
 import jwt from "jsonwebtoken";
 
-const createUser = async ({ name, email, password }: any) => {
+const createUser = async ({ name, email, password }: any, { res }: any) => {
   return await prisma.$transaction(async (tx) => {
     await validateEmailAvailable(email);
     const hashPassword = await bcrypt.hash(password, 10);
@@ -24,7 +24,12 @@ const createUser = async ({ name, email, password }: any) => {
       newUser.id,
       process.env.JWT_SECRET as string
     );
-
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    });
     const { password: pass, ...userWithoutPassword } = newUser;
 
     return {
@@ -34,13 +39,20 @@ const createUser = async ({ name, email, password }: any) => {
     };
   });
 };
-const signin = async ({ email, password }: any) => {
+const signin = async ({ email, password }: any, { res }: any) => {
   const user = await findUserOrThrow({ email });
   await checkPassword({ user, password });
-  const token = jwtHelper.generateToken(
+  const token = await jwtHelper.generateToken(
     user.id,
     process.env.JWT_SECRET as string
   );
+  console.log(token);
+  res.cookie("token", token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    maxAge: 7 * 24 * 60 * 60 * 1000,
+  });
   const { password: pass, ...userWithoutPassword } = user;
   return {
     message: "Signin successful",
@@ -49,13 +61,16 @@ const signin = async ({ email, password }: any) => {
   };
 };
 
-const deleteUser = async ({
-  userId,
-  deleteId,
-}: {
-  userId: string;
-  deleteId: string;
-}) => {
+const deleteUser = async (
+  {
+    userId,
+    deleteId,
+  }: {
+    userId: string;
+    deleteId: string;
+  },
+  { res }: any
+) => {
   return await prisma.$transaction(async (tx) => {
     const user = await findUserOrThrow({ userId });
     if (user.id !== deleteId) authorization.requireAdmin(user);
@@ -67,6 +82,7 @@ const deleteUser = async ({
     const deleteUser = await tx.user.delete({
       where: { id: deleteId },
     });
+    if (user.id === deleteId) res.clearCookie("token");
     return {
       message: "User deleted successfully",
       user: deleteUser,
