@@ -17,6 +17,8 @@ model User {
   id                  String     @id @default(uuid())
   name                String
   email               String     @unique
+  avatarId            String?    @unique
+  avatar              Picture?   @relation("Avatar", fields: [avatarId], references: [id])
   createdAt           DateTime   @default(now())
   password            String
   role                Role       @default(USER)
@@ -25,19 +27,17 @@ model User {
 }
 
 model Profile {
-  id          String      @id @default(uuid())
-  avatarId    String?     @unique
-  avatar      Picture?    @relation("ProfileAvatar", fields: [avatarId], references: [id])
+  id          String     @id @default(uuid())
   bio         String?
-  userId      String      @unique
-  user        User        @relation(fields: [userId], references: [id])
-  session     Session?
-  shift       Shift?
-  gender      Gender?
-  department  Department?
+  userId      String     @unique
+  user        User       @relation(fields: [userId], references: [id])
+  session     String
+  shift       Shift
+  gender      Gender
+  department  Department
   phone       String?
-  roll        String?
-  polytechnic String?
+  roll        String
+  polytechnic String
 }
 
 model Workshop {
@@ -59,7 +59,7 @@ model Review {
   rating      Int
   status      Status     @default(PENDING)
   department  Department
-  session     Session
+  session     String
   shift       Shift
   createdAt   DateTime   @default(now())
 }
@@ -68,8 +68,8 @@ model Picture {
   id       String    @id @default(ulid())
   image    String
   review   Review?   @relation("UserImage")
-  Profile  Profile?  @relation("ProfileAvatar")
   Workshop Workshop? @relation("WorkshopBanner")
+  User     User?     @relation("Avatar")
 }
 
 model Otp {
@@ -81,15 +81,15 @@ model Otp {
   createdAt  DateTime @default(now())
 }
 
-enum Session {
-  SESSION_18_19 @map("18-19")
-  SESSION_19_20 @map("19-20")
-  SESSION_20_21 @map("20-21")
-  SESSION_21_22 @map("21-22")
-  SESSION_22_23 @map("22-23")
-  SESSION_23_24 @map("23-24")
-  SESSION_24_25 @map("24-25")
-}
+// enum Session {
+//   SESSION_18_19 @map("18-19")
+//   SESSION_19_20 @map("19-20")
+//   SESSION_20_21 @map("20-21")
+//   SESSION_21_22 @map("21-22")
+//   SESSION_22_23 @map("22-23")
+//   SESSION_23_24 @map("23-24")
+//   SESSION_24_25 @map("24-25")
+// }
 
 enum Department {
   COMPUTER    @map("Computer Technology")

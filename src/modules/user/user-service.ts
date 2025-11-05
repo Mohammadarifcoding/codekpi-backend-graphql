@@ -15,10 +15,10 @@ const createUser = async ({ name, email, password }: any, { res }: any) => {
       data: { name, email, password: hashPassword },
     });
 
-    // Create profile
-    await tx.profile.create({
-      data: { userId: newUser.id },
-    });
+    // // Create profile
+    // await tx.profile.create({
+    //   data: { userId: newUser.id },
+    // });
 
     const token = await jwtHelper.generateToken(
       newUser.id,
@@ -46,7 +46,6 @@ const signin = async ({ email, password }: any, { res }: any) => {
     user.id,
     process.env.JWT_SECRET as string
   );
-  console.log(token);
   res.cookie("token", token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",

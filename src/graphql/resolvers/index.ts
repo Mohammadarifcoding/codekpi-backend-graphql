@@ -12,20 +12,20 @@ export const resolvers = {
   //     });
   //   },
   // },
-  Profile: {
-    avatar: async (parent: any, args: any, ctx: any) => {
-      if (!parent.avatarId) return null;
-      return await ctx.prisma.picture.findUnique({
-        where: { id: parent.avatarId },
-      });
-    },
-  },
-  Review: {
-    userImage: async (parent: any, args: any, ctx: any) => {
-      if (!parent.userImageId) return null;
-      return await ctx.prisma.picture.findUnique({
-        where: { id: parent.userImageId },
-      });
-    },
-  },
+  // User: {
+  //   avatar: async (parent: any, args: any, ctx: any) => {
+  //     if (!parent.avatarId) return null;
+  //     return await ctx.prisma.picture.findUnique({
+  //       where: { id: parent.avatarId },
+  //     });
+  //   },
+  // },
+  // Review: {
+  //   userImage: async (parent: any, args: any, ctx: any) => {
+  //     if (!parent.userImageId) return null;
+  //     return await ctx.prisma.picture.findUnique({
+  //       where: { id: parent.userImageId },
+  //     });
+  //   },
+  // },
 };

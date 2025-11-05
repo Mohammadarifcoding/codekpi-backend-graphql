@@ -10,16 +10,6 @@ export const typeDefs = gql`
   # =====================
   # ENUMS
   # =====================
-  enum Session {
-    SESSION_18_19
-    SESSION_19_20
-    SESSION_20_21
-    SESSION_21_22
-    SESSION_22_23
-    SESSION_23_24
-    SESSION_24_25
-  }
-
   enum Department {
     COMPUTER
     CIVIL
@@ -30,6 +20,14 @@ export const typeDefs = gql`
     AUTOMOBILE
     RAC
     OTHER
+  }
+  enum Session {
+    SESSION_18_19
+    SESSION_19_20
+    SESSION_20_21
+    SESSION_21_22
+    SESSION_22_23
+    SESSION_23_24
   }
 
   enum Gender {
@@ -62,13 +60,13 @@ export const typeDefs = gql`
     name: String!
     email: String!
     createdAt: DateTime!
+    avatar: Picture
     profile: Profile
     interestedWorkshops: [Workshop!]!
   }
 
   type Profile {
     id: ID!
-    avatar: Picture
     bio: String
     userId: String!
     user: User!
@@ -102,12 +100,13 @@ export const typeDefs = gql`
     shift: Shift
     createdAt: DateTime!
   }
-  type OTP {
+
+  type Otp {
     id: ID!
     email: String!
     used: Boolean!
     expires_at: String!
-    createdAt: String!
+    createdAt: DateTime!
   }
 
   # =====================
@@ -149,6 +148,13 @@ export const typeDefs = gql`
     limit: Int!
     total: Int!
   }
+  type ReviewsResponse {
+    message: String!
+    data: [Review!]!
+    page: Int!
+    limit: Int!
+    total: Int!
+  }
   type CreateOTPResponse {
     success: Boolean!
     message: String!
@@ -160,6 +166,11 @@ export const typeDefs = gql`
     verified: Boolean
     resetToken: String
   }
+  type CreateReviewResponse {
+    message: String!
+    review: Review
+  }
+
   # =====================
   # INPUT TYPES
   # =====================
@@ -178,7 +189,7 @@ export const typeDefs = gql`
 
   input UpdateProfileInput {
     bio: String
-    session: Session
+    session: String
     shift: Shift
     gender: Gender
     department: Department
@@ -206,7 +217,7 @@ export const typeDefs = gql`
     users(page: Int, limit: Int): UsersResponse!
     profiles: [Profile!]!
     workshops: AllWorkshopResponse!
-    reviews(page: Int!, limit: Int!): [Review!]!
+    reviews(page: Int, limit: Int): ReviewsResponse!
     getProfile: Profile!
   }
 
@@ -231,8 +242,8 @@ export const typeDefs = gql`
     makeWorkshopInterested(workshopId: String!): WorkshopResponse!
     makeWorkshopNotInterested(workshopId: String!): WorkshopResponse!
 
-    createReview(input: CreateReviewInput!): Review!
-    updateStatus(id: ID!, status: Status!): Review!
-    deleteReview(id: ID!): Review!
+    createReview(input: CreateReviewInput!): CreateReviewResponse!
+    updateStatus(id: ID!, status: Status!): SuccessMessage!
+    deleteReview(id: ID!): SuccessMessage!
   }
 `;
