@@ -2,7 +2,6 @@ import { userService } from "./user-service";
 
 export const userQueryResolver = {
   users: async (args: any, data: any, context: any) => {
-    console.log(data);
     return await userService.getUsers(
       data?.skip,
       data?.limit,

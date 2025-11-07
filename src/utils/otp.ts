@@ -1,4 +1,5 @@
 import nodemailer from "nodemailer";
+import logger from "../constants/logger";
 
 export const sendVerificationEmail = async (email: string, code: string) => {
   const transporter = nodemailer.createTransport({
@@ -26,7 +27,7 @@ export const sendVerificationEmail = async (email: string, code: string) => {
   };
 
   await transporter.sendMail(mailOptions);
-  console.log(`✅ Email sent to ${email}`);
+  logger.info("Verification email sent", { email });
 };
 export function generateOTP() {
   return Math.floor(100000 + Math.random() * 900000).toString();

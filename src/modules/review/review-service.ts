@@ -15,7 +15,6 @@ type CreateReviewInput = {
 };
 
 const createReview = async (data: CreateReviewInput) => {
-  console.log(data);
   if (!data.userImage) {
     throw new Error("User image is required");
   }
@@ -27,7 +26,6 @@ const createReview = async (data: CreateReviewInput) => {
   const sessionKey = (
     Object.keys(sessionMap) as Array<keyof typeof sessionMap>
   ).find((key) => {
-    console.log(sessionMap[key], reviewData.session);
     return sessionMap[key] == reviewData.session;
   });
   if (!sessionKey) {
@@ -51,7 +49,6 @@ const createReview = async (data: CreateReviewInput) => {
 
 const updateStatus = async (id: string, status: Status, userId: string) => {
   const user = await userService.findUserOrThrow({ userId: userId });
-  console.log(user);
   authorization.requireAdmin(user);
 
   await prisma.review.update({

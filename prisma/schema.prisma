@@ -65,11 +65,12 @@ model Review {
 }
 
 model Picture {
-  id       String    @id @default(ulid())
-  image    String
-  review   Review?   @relation("UserImage")
-  Workshop Workshop? @relation("WorkshopBanner")
-  User     User?     @relation("Avatar")
+  id        String           @id @default(ulid())
+  image     String
+  review    Review?          @relation("UserImage")
+  Workshop  Workshop?        @relation("WorkshopBanner")
+  User      User?            @relation("Avatar")
+  Committee CommitteeMember? @relation("MemberPicture")
 }
 
 model Otp {
@@ -79,6 +80,47 @@ model Otp {
   expires_at DateTime
   used       Boolean  @default(false)
   createdAt  DateTime @default(now())
+}
+
+model Committee {
+  id        String            @id @default(ulid())
+  year      Int               @default(2025)
+  name      String            @default("CodeKPI Committee 2025")
+  members   CommitteeMember[]
+  createdAt DateTime          @default(now())
+}
+
+model CommitteeMember {
+  id              String        @id @default(cuid())
+  committee       Committee     @relation(fields: [committeeId], references: [id])
+  committeeId     String
+  role            CommitteeRole
+  name            String
+  email           String
+  department      Department?
+  session         String?
+  speciality      String
+  memberPictureId String?       @unique
+  memberPicture   Picture?      @relation("MemberPicture", fields: [memberPictureId], references: [id])
+  phone           String
+  positionOrder   Int?
+  year            Int           @default(2025)
+  createdAt       DateTime      @default(now())
+}
+
+enum CommitteeRole {
+  PRESIDENT               @map("President")
+  VICE_PRESIDENT          @map("Vice President")
+  GENERAL_SECRETARY       @map("General Secretary")
+  JOINT_GENERAL_SECRETARY @map("Joint General Secretary")
+  FINANCE_SECRETARY       @map("Finance Secretary")
+  OFFICE_SECRETARY        @map("Office Secretary")
+  MEDIA_SECRETARY         @map("Media Secretary")
+  COMMUNICATION_SECRETARY @map("Communication Secretary")
+  PUBLICITY_SECRETARY     @map("Publicity Secretary")
+  MENTOR                  @map("Mentor")
+  ADVISOR                 @map("Advisor")
+  REPRESENTATIVE          @map("Representative")
 }
 
 // enum Session {

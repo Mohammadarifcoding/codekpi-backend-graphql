@@ -2,7 +2,6 @@ import { reviewService } from "./review-service";
 
 export const reviewQueryResolver = {
   reviews: async (_: any, data: any, context: any) => {
-    console.log(data);
     return await reviewService.getAllReviews(data.page, data.limit);
   },
 };

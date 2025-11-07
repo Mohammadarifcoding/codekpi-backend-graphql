@@ -12,13 +12,11 @@ export const workshopMutationResolver = {
     { input: { title, content, banner } }: any,
     context: any
   ) => {
-    console.log(title, content, banner);
     const data = await workshopService.createWorkshop({
       title,
       content,
       banner,
     });
-    console.log(data);
     return data;
   },
   updateWorkshop: async (_: any, data: any, context: any) => {

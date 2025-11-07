@@ -112,7 +112,6 @@ const getUsers = async (
   userId: string
 ) => {
   const user = await findUserOrThrow({ userId: userId });
-  console.log(user);
   authorization.requireAdmin(user);
   const skip = (page - 1) * limit;
   const data = await prisma.user.findMany({

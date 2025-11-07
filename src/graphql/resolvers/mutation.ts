@@ -1,3 +1,4 @@
+import { committeeMutationResolver } from "../../modules/committee/committee-gql";
 import { profileMutationResolver } from "../../modules/profile/profile-gql";
 import { reviewMutationResolver } from "../../modules/review/review-gql";
 import { userMutationResolver } from "../../modules/user/user-gql";
@@ -8,4 +9,5 @@ export const Mutation = {
   ...workshopMutationResolver,
   ...profileMutationResolver,
   ...reviewMutationResolver,
+  ...committeeMutationResolver,
 };

@@ -10,7 +10,6 @@ const requireAuth = (user: Partial<User>) => {
 };
 
 const requireRole = (user: Partial<User>, ...allowedRoles: string[]) => {
-  console.log(user, allowedRoles);
   requireAuth(user);
   if (!user.role || !allowedRoles.includes(user.role)) {
     throw new GraphQLError("Not authorized", {

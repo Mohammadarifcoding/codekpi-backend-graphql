@@ -1,3 +1,4 @@
+import { committeeQueryResolver } from "../../modules/committee/committee-gql";
 import { profileQueryResolver } from "../../modules/profile/profile-gql";
 import { reviewQueryResolver } from "../../modules/review/review-gql";
 import { userQueryResolver } from "../../modules/user/user-gql";
@@ -8,4 +9,5 @@ export const Query = {
   ...workshopQueryResolver,
   ...profileQueryResolver,
   ...reviewQueryResolver,
+  ...committeeQueryResolver,
 };

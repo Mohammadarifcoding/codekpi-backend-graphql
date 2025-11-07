@@ -33,7 +33,6 @@ export const startServer = async () => {
     context: async ({ req, res }) => {
       const token = req.headers.authorization || "";
       const user = await jwtHelper.getUserInfoFromToken(token);
-      console.log(user);
       return { user, res, req };
     },
   });
