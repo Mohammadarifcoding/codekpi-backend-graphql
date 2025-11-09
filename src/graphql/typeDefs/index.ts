@@ -217,15 +217,16 @@ export const typeDefs = gql`
 
   type CommitteeMemberResponse implements BaseResponse {
     message: String!
-    member: CommitteeMember
+    data: CommitteeMember
   }
   type CommitteeMembersResponse implements BaseResponse {
     message: String!
-    members: [CommitteeMember!]!
+    data: [CommitteeMember!]!
   }
   type AllCommitteePayload implements BaseResponse {
     message: String!
-    committees: [Committee!]!
+    success: Boolean!
+    data: [Committee!]!
   }
 
   # =====================
@@ -281,11 +282,11 @@ export const typeDefs = gql`
     role: CommitteeRole!
     name: String!
     email: String!
-    department: Department
+    department: Department!
     session: String!
     speciality: String!
     memberPicture: String
-    phone: String
+    phone: String!
     positionOrder: Int
     year: Int!
   }

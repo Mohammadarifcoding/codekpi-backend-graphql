@@ -11,6 +11,8 @@ import {
   committeeValidation,
   type CreateCommitteeInput,
   type UpdateCommitteeInput,
+  type CommitteeMemberCreateSchema,
+  type CommitteeMemberInput,
 } from "./committee-validation";
 
 /**
@@ -37,7 +39,6 @@ export const createCommittee = async (
       createdBy: userId,
       committeeId: committee.id,
     });
-
     return {
       success: true,
       message: "Committee created successfully",
@@ -98,8 +99,72 @@ const updateCommittee = async (
   });
 };
 
+/**
+ * @desc Get all committees
+ */
+
+const getAllCommittees = async (): Promise<ApiResponse> => {
+  const data = await prisma.committee.findMany({
+    where: { createdAt: { gt: new Date(0) } },
+  });
+  return {
+    success: true,
+    message: "Committee fetched successfully ✅",
+    data: data,
+  };
+};
+
+/**
+ * @desc Create Committee member
+ */
+
+const createCommitteeMember = async (
+  input: CommitteeMemberInput,
+  userId: string
+): Promise<ApiResponse> => {
+  console.log(input);
+  validateInput(
+    committeeValidation.CommitteeMemberCreateSchema,
+    input,
+    "Create Committee Member"
+  );
+  const user = await userService.findUserOrThrow({ userId });
+  authorization.requireAdmin(user);
+
+  return safeExecute(async () => {
+    let memberPictureId: string | undefined;
+    if (input.memberPicture) {
+      const picture = await prisma.picture.create({
+        data: {
+          image: input.memberPicture,
+        },
+      });
+      memberPictureId = picture.id;
+    }
+    const { memberPicture, committeeId, ...rest } = input;
+    const committeeMember = await prisma.committeeMember.create({
+      data: {
+        ...rest,
+        committee: { connect: { id: committeeId } },
+        ...(memberPictureId && {
+          memberPicture: { connect: { id: memberPictureId } },
+        }),
+      } as Prisma.CommitteeMemberCreateInput,
+      include: { memberPicture: true, committee: true },
+    });
+
+    return {
+      success: true,
+      message: "Committee member created successfully",
+      data: committeeMember,
+    };
+  });
+};
+
 export const CommitteeService = {
   createCommittee,
   deleteCommittee,
   updateCommittee,
+  getAllCommittees,
+  createCommitteeMember,
 };

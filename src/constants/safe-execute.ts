@@ -12,9 +12,9 @@ export async function safeExecute<T>(
   try {
     const result = await fn();
     return {
-      success: true,
-      message: "Success",
-      data: result as T,
+      success: result.success,
+      message: result.message,
+      data: result.data as T,
     };
   } catch (error: unknown) {
     if (error instanceof Prisma.PrismaClientKnownRequestError) {
