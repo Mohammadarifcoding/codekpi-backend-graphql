@@ -21,14 +21,6 @@ export const typeDefs = gql`
     RAC
     OTHER
   }
-  enum Session {
-    SESSION_18_19
-    SESSION_19_20
-    SESSION_20_21
-    SESSION_21_22
-    SESSION_22_23
-    SESSION_23_24
-  }
 
   enum Gender {
     MALE
@@ -85,7 +77,7 @@ export const typeDefs = gql`
     bio: String
     userId: String!
     user: User!
-    session: Session
+    session: String
     shift: Shift
     gender: Gender
     department: Department
@@ -111,7 +103,7 @@ export const typeDefs = gql`
     rating: Int!
     status: Status
     department: Department
-    session: Session
+    session: String
     shift: Shift
     createdAt: DateTime!
   }
@@ -204,9 +196,10 @@ export const typeDefs = gql`
     verified: Boolean
     resetToken: String
   }
-  type CreateReviewResponse {
+  type ReviewResponse {
     message: String!
-    review: Review
+    data: Review
+    success: Boolean!
   }
 
   type CommitteeResponse implements BaseResponse {
@@ -262,7 +255,7 @@ export const typeDefs = gql`
     text: String!
     rating: Int!
     department: Department!
-    session: Session!
+    session: String!
     shift: Shift!
     userImage: String! # user uploads image string
   }
@@ -340,9 +333,9 @@ export const typeDefs = gql`
     makeWorkshopInterested(workshopId: String!): WorkshopResponse!
     makeWorkshopNotInterested(workshopId: String!): WorkshopResponse!
 
-    createReview(input: CreateReviewInput!): CreateReviewResponse!
-    updateStatus(id: ID!, status: Status!): SuccessMessage!
-    deleteReview(id: ID!): SuccessMessage!
+    createReview(input: CreateReviewInput!): ReviewResponse!
+    updateStatus(id: ID!, status: Status!): ReviewResponse!
+    deleteReview(id: ID!): ReviewResponse!
 
     createCommittee(input: CreateCommitteeInput!): CommitteeResponse!
     updateCommittee(id: ID!, input: UpdateCommitteeInput!): CommitteeResponse!

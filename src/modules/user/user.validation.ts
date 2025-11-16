@@ -11,3 +11,6 @@ export const DepartmentEnum = z.enum([
   "RAC",
   "OTHER",
 ]);
+
+export const ShiftEnum = z.enum(["MORNING", "EVENING"]);
+export const GenderEnum = z.enum(["MALE", "FEMALE", "OTHER"]);

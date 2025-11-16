@@ -4,47 +4,45 @@ import { pictureService } from "../picture/picture-service";
 import { sessionMap } from "./review-utis";
 import { userService } from "../user/user-service";
 import { authorization } from "../../utils/authorization";
-type CreateReviewInput = {
-  name: string;
-  text: string;
-  rating: number;
-  department: Department;
-  session: string;
-  shift: Shift;
-  userImage: string; // <-- this comes from GraphQL
-};
+import type { ApiResponse } from "../../constants/ApiResponse";
+import {
+  createReviewSchema,
+  type CreateReviewInput,
+} from "./review-validation";
+import { validateInput } from "../../utils/validateInput";
+import { safeExecute } from "../../constants/safe-execute";
 
-const createReview = async (data: CreateReviewInput) => {
-  if (!data.userImage) {
-    throw new Error("User image is required");
-  }
+const createReview = async (data: CreateReviewInput): Promise<ApiResponse> => {
+  validateInput(createReviewSchema, data, "Create Review");
 
   const picture = await pictureService.createPicture(data.userImage, prisma); // <— use userImage
-
+  console.log(picture);
   const { userImage, ...reviewData } = data;
 
-  const sessionKey = (
-    Object.keys(sessionMap) as Array<keyof typeof sessionMap>
-  ).find((key) => {
-    return sessionMap[key] == reviewData.session;
-  });
-  if (!sessionKey) {
-    throw new Error("Invalid session value");
-  }
+  // const sessionKey = (
+  //   Object.keys(sessionMap) as Array<keyof typeof sessionMap>
+  // ).find((key) => {
+  //   return sessionMap[key] == reviewData.session;
+  // });
+  // if (!sessionKey) {
+  //   throw new Error("Invalid session value");
+  // }
+  return safeExecute(async () => {
+    const newReview = await prisma.review.create({
+      data: {
+        ...reviewData,
+        status: "PENDING",
+        userImage: { connect: { id: picture.id } },
+      },
+      include: { userImage: true },
+    });
 
-  const newReview = await prisma.review.create({
-    data: {
-      ...reviewData,
-      session: sessionKey,
-      status: "APPROVED",
-      userImage: { connect: { id: picture.id } },
-    },
+    return {
+      success: true,
+      message: "Review created successfully ✅",
+      data: newReview,
+    };
   });
-
-  return {
-    message: "Review created successfully ✅",
-    review: newReview,
-  };
 };
 
 const updateStatus = async (id: string, status: Status, userId: string) => {
@@ -62,37 +60,49 @@ const updateStatus = async (id: string, status: Status, userId: string) => {
   };
 };
 
-const getAllReviews = async (page: string = "1", limit: string = "10") => {
+const getAllReviews = async (
+  page: string = "1",
+  limit: string = "10"
+): Promise<ApiResponse> => {
   let page_int = parseInt(page);
   let limit_int = parseInt(limit);
   const skip = (page_int - 1) * limit_int;
-  const reviews = await prisma.review.findMany({
-    skip,
-    take: limit_int,
-    orderBy: { createdAt: "desc" },
+  return safeExecute(async () => {
+    const reviews = await prisma.review.findMany({
+      skip,
+      take: limit_int,
+      orderBy: { createdAt: "desc" },
+      include: { userImage: true },
+    });
+    console.log(reviews);
+    return {
+      message: "Reviews fetched successfully ✅",
+      success: true,
+      data: reviews,
+      page: page_int,
+      limit: limit_int,
+      total: await prisma.review.count({ where: { status: "APPROVED" } }),
+    };
   });
-  return {
-    message: "Reviews fetched successfully ✅",
-    data: reviews,
-    page: page,
-    limit: limit,
-    total: await prisma.review.count({ where: { status: "APPROVED" } }),
-  };
 };
 
-const deleteReview = async (id: string) => {
-  const deletedReview = await prisma.review.delete({
-    where: { id },
-  });
-  if (deletedReview.userImageId) {
-    await prisma.picture.delete({
-      where: { id: deletedReview.userImageId },
+const deleteReview = async (id: string): Promise<ApiResponse> => {
+  return safeExecute(async () => {
+    const deletedReview = await prisma.review.delete({
+      where: { id },
+      include: { userImage: true },
     });
-  }
-  return {
-    message: "Review deleted successfully ✅",
-    success: true,
-  };
+    if (deletedReview.userImageId) {
+      await prisma.picture.delete({
+        where: { id: deletedReview.userImageId },
+      });
+    }
+    return {
+      message: "Review deleted successfully ✅",
+      success: true,
+      data: deletedReview,
+    };
+  });
 };
 export const reviewService = {
   getAllReviews,

@@ -57,7 +57,7 @@ model Review {
   name        String
   text        String
   rating      Int
-  status      Status     @default(PENDING)
+  status      Status?    @default(PENDING)
   department  Department
   session     String
   shift       Shift
