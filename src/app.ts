@@ -30,6 +30,7 @@ export const startServer = async () => {
   const server = new ApolloServer({
     typeDefs,
     resolvers,
+    introspection: true,
     context: async ({ req, res }) => {
       const token = req.headers.authorization || "";
       const user = await jwtHelper.getUserInfoFromToken(token);
