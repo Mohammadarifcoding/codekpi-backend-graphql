@@ -1,0 +1,1 @@
+{"version":3,"file":"review-gql.d.ts","sourceRoot":"","sources":["../../../src/modules/review/review-gql.ts"],"names":[],"mappings":"AAEA,eAAO,MAAM,mBAAmB;iBACX,GAAG,QAAQ,GAAG,WAAW,GAAG;CAGhD,CAAC;AAEF,eAAO,MAAM,sBAAsB;sBACT,GAAG,QAAQ,GAAG;sBAGd,GAAG,QAAQ,GAAG,WAAW,GAAG;;;;sBAO5B,GAAG,QAAQ,GAAG;CAGvC,CAAC"}
