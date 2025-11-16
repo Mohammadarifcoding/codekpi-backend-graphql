@@ -1,1 +1,0 @@
-{"version":3,"file":"committee-gql.d.ts","sourceRoot":"","sources":["../../../src/modules/committee/committee-gql.ts"],"names":[],"mappings":"AAEA,eAAO,MAAM,sBAAsB;4BACH,GAAG,QAAQ,GAAG,WAAW,GAAG;CAG3D,CAAC;AAEF,eAAO,MAAM,yBAAyB;8BACJ,GAAG,QAAQ,GAAG,WAAW,GAAG;8BAM5B,GAAG,QAAQ,GAAG,WAAW,GAAG;8BAM5B,GAAG,QAAQ,GAAG,WAAW,GAAG;oCAOtB,GAAG,QAAQ,GAAG,WAAW,GAAG;CAMnE,CAAC"}
