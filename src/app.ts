@@ -19,6 +19,11 @@ app.use(
 );
 app.use(express.json());
 
+app.use("/graphql", (a, b, c) => {
+  console.log(a, b);
+  c();
+});
+
 // REST API route
 // app.use("/api/users", userRouter);
 
@@ -37,6 +42,7 @@ export const startServer = async () => {
       return { user, res, req };
     },
   });
+
   await server.start();
   server.applyMiddleware({ app: app as any, path: "/graphql" });
   return app;
