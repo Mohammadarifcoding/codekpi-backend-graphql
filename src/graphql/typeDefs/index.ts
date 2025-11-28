@@ -180,9 +180,10 @@ export const typeDefs = gql`
   }
   type ReviewsResponse {
     message: String!
-    data: [Review!]!
-    page: Int!
-    limit: Int!
+    success: Boolean!
+    data: [Review!]
+    page: Int
+    limit: Int
     total: Int!
   }
   type CreateOTPResponse {
